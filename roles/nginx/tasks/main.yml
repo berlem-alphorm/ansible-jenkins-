@@ -1,37 +1,19 @@
-- name: Ensure nginx is installed
-  apt:
-    name: nginx
+- name: install nginx
+  apt: 
+    name:
+      - nginx
     state: present
     update_cache: yes
     cache_valid_time: 3600
   become: yes
 
-- name: Check nginx configuration
-  command: nginx -t
-  become: yes
-  register: nginx_config_check
-  ignore_errors: yes
-
-- name: Fail if nginx configuration is invalid
-  fail:
-    msg: "nginx configuration is invalid"
-  when: nginx_config_check.rc != 0
-
-- name: Restart nginx
+- name: restart nginx  
   service:
     name: nginx
-    state: restarted
-  become: yes
-
-- name: Ensure nginx is running
-  command: systemctl is-active nginx
-  register: nginx_status
-  failed_when: nginx_status.stdout != "active"
-  become: yes
-
-- name: Deploy index.html template
+    state: started
+  become: true
+  become_method: sudo
+- name: index
   template:
     src: index.html.j2
     dest: /var/www/html/index.html
-  become: yes
-
